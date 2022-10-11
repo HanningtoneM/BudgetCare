@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Entity, type: :model do
   subject do
-    user = User.create(name: 'Kelvin', password: 'password', email: 'kelybush@gmail.com')
+    user = User.create(name: 'hanningtone', password: 'password', email: 'han@gmail.com')
     Entity.new(name: 'Food', amount: 867.4, author: user)
   end
 
