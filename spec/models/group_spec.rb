@@ -1,20 +1,24 @@
 require 'rails_helper'
 
 RSpec.describe Group, type: :model do
-  subject do
-    user = User.create(name: 'hanningtone', password: 'password', email: 'han@gmail.com')
-    Group.new(name: 'Food', icon: 'https://example.com', author: user)
+  before(:each) do
+    @user = User.first
+    @group = Group.new(user: @user, name: 'Category 1', icon: 'http://google.com')
+    @entity = Entity.new(user: @user, name: 'transaction 1', amount: 10)
   end
 
-  before { subject.save }
-
-  it 'should have valid name' do
-    subject.name = nil
-    expect(subject).to_not be_valid
+  it 'Name should not be blank' do
+    @group.name = nil
+    expect(@group).to_not be_valid
   end
 
-  it 'should have valid icon' do
-    subject.icon = nil
-    expect(subject).to_not be_valid
+  it 'Icon should not be blank' do
+    @group.icon = nil
+    expect(@group).to_not be_valid
+  end
+
+  it 'Test for join table (entity_group)' do
+    @group.entities << @entity
+    expect(@group.entities.first.amount).to eq(@entity.amount)
   end
 end

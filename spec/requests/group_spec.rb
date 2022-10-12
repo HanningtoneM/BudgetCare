@@ -2,15 +2,27 @@ require 'rails_helper'
 
 RSpec.describe 'Groups', type: :request do
   include Devise::Test::IntegrationHelpers
-  before do
-    @user = User.create(name: 'Hanningtone', password: 'password', email: 'han@gmail.com')
-    @group = @user.groups.create(name: 'Birthday', icon: 'https://google.com')
-    sign_in @user
-  end
 
-  describe 'GET /index' do
-    it 'returns http success' do
-      get group_index_path
+  describe 'Group request test' do
+    before(:each) do
+      @user = User.create(name: 'Tester', email: 'test@gmail.com', password: '12345678')
+      @group = Group.create(user: @user, name: 'Category 1', icon: 'http://google.com')
+
+      sign_in @user
+    end
+
+    it 'groups#index - should response status success' do
+      get user_groups_path(@user.id)
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'groups#show - should response status success' do
+      get user_group_path(@user.id, @group.id)
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'groups#new - should response status success' do
+      get new_user_group_path(@user.id)
       expect(response).to have_http_status(:success)
     end
   end
