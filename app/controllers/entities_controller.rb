@@ -1,35 +1,37 @@
 class EntitiesController < ApplicationController
   before_action :authenticate_user!
+  load_and_authorize_resource
+
   def index
-    @group = current_user.groups.find(params[:group_id])
-    @entities = @group.entities
+    @entities = Entity.all
   end
 
   def new
-    @group = current_user.groups.find(params[:group_id])
+    @group = Group.includes(:user).find(params[:group_id])
     @entity = @group.entities.new
   end
 
-  def create
-    @group = current_user.groups.find(params[:group_id])
-    @entity = current_user.entities.create(entity_params)
-    puts @entity
-    if @entity.save
-      @group_entity = @entity.group_entities.create(group_id: @group.id, entity_id: @entity.id)
-      if @group_entity.save
-        flash[:notice] = 'New transaction created successfully'
-        redirect_to group_entities_path(@group)
-      else
-        flash.now[:alert] = 'Transaction category creation failed'
-        render action: 'new'
-      end
-    else
-      flash.now[:alert] = 'Transaction creation failed'
-      render action: 'new'
-    end
+  def destroy
+    @group = Group.includes(:user).find(params[:group_id])
+    @entity = Entity.includes(:user).find(params[:id])
+    @entity.destroy
+    flash[:success] = "You have deleted your '#{@entity.name}' !!."
+    redirect_to user_group_path(user_id: current_user.id, id: @group.id)
   end
 
-  private
+  def create
+    @group = Group.includes(:user).find(params[:group_id])
+    @entity = current_user.entities.create(entity_params)
+    @group.entities << @entity
+
+    if @entity.save
+      flash[:success] = "'#{@entity.name}' created successfully !!"
+      redirect_to user_group_path(user_id: current_user.id, id: @group.id)
+    else
+      flash.now[:error] = "Couldn't create '#{@entity.name} !!'"
+      redirect_to new_user_group_entity(current_user, @group.id)
+    end
+  end
 
   def entity_params
     params.require(:entity).permit(:name, :amount)

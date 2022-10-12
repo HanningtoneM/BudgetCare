@@ -1,7 +1,20 @@
 Rails.application.routes.draw do
   devise_for :users
-  resources :group, only: [:index, :new, :create] do
-    resources :entities, only: [:index, :new, :create]
+
+  unauthenticated :users do
+    root "users#home"
   end
-  root to: 'group#index'
+
+  authenticated :users do
+    #get "/home", to: "groups#index", as: "home"
+    #root 'groups#index', as: ''
+  end
+
+  resources :home, controller: :groups, only: [:index]
+
+  resources :users do
+    resources :groups, :path => 'categories', only: [:index, :show, :new, :create, :destroy] do
+      resources :entities, :path => 'transactions', only: [:new, :create, :destroy]
+    end
+  end
 end
